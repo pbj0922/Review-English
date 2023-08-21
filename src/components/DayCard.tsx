@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FC } from "react";
 
 type DayCardProps = {
@@ -6,9 +7,11 @@ type DayCardProps = {
 
 const DayCard: FC<DayCardProps> = ({ index }) => {
   return (
-    <li className="text-center border-black border-2 font-medium rounded-lg shadow-md shadow-gray-300">
-      <button>Day {index + 1}</button>
-    </li>
+    <Link href={`/day/${index + 1}`}>
+      <li className="text-center border-black border-2 font-medium rounded-lg shadow-md shadow-gray-300 hover:shadow-white">
+        Day {index + 1}
+      </li>
+    </Link>
   );
 };
 
