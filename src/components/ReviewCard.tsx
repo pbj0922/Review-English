@@ -4,6 +4,7 @@ import LeftArrow from "@/app/icons/LeftArrow";
 import RightArrow from "@/app/icons/RightArrow";
 import Speaker from "@/app/icons/Speaker";
 import { Treview } from "@/app/day/[id]/page";
+import axios from "axios";
 
 type ReviewCardProps = Pick<Treview, "sentences"> & {
   currentReviewIndex: number;
@@ -18,6 +19,7 @@ const ReviewCard: FC<ReviewCardProps> = ({
   setCurrentReviewIndex,
 }) => {
   const [language, setLanguage] = useState<TLanguage>("korean");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const onClickLanguage = () => {
     if (language === "korean") {
@@ -45,6 +47,37 @@ const ReviewCard: FC<ReviewCardProps> = ({
     setLanguage("korean");
   };
 
+  const onClickListen = async () => {
+    try {
+      if (isLoading) return;
+
+      setIsLoading(true);
+
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}/api`, {
+        text: sentences[currentReviewIndex].english,
+      });
+
+      const binaryData = atob(response.data.audioContent);
+
+      const byteArray = new Uint8Array(binaryData.length);
+
+      for (let i = 0; i < binaryData.length; i++) {
+        byteArray[i] = binaryData.charCodeAt(i);
+      }
+
+      const blob = new Blob([byteArray.buffer], { type: "audio/mp3" });
+
+      const newAudio = new Audio(URL.createObjectURL(blob));
+
+      document.body.appendChild(newAudio);
+      newAudio.play();
+
+      setTimeout(() => setIsLoading(false), 3000);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="w-full">
       <div className="h-60">
@@ -52,7 +85,7 @@ const ReviewCard: FC<ReviewCardProps> = ({
           {sentences[currentReviewIndex][language]}
         </div>
         <div className="mt-2">
-          <button className="btn-style">
+          <button onClick={onClickListen} className="btn-style">
             <Speaker />
           </button>
         </div>
